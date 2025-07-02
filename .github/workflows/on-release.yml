@@ -3,57 +3,57 @@
 # The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 # See the LICENSE and NOTICES files in the project root for more information.
 
-name: On Release
-on:
-  release:
-    types:
-      - released
+# name: On Release
+# on:
+#   release:
+#     types:
+#       - released
 
-permissions: read-all
+# permissions: read-all
 
-env:
-  ARTIFACTS_API_KEY: ${{ secrets.AZURE_ARTIFACTS_PERSONAL_ACCESS_TOKEN }}
-  ARTIFACTS_PACKAGES_URL: ${{ secrets.ARTIFACTS_PACKAGES_URL }}
-  ARTIFACTS_USERNAME: ${{ secrets.AZURE_ARTIFACTS_USER_NAME }}
+# env:
+#   ARTIFACTS_API_KEY: ${{ secrets.AZURE_ARTIFACTS_PERSONAL_ACCESS_TOKEN }}
+#   ARTIFACTS_PACKAGES_URL: ${{ secrets.ARTIFACTS_PACKAGES_URL }}
+#   ARTIFACTS_USERNAME: ${{ secrets.AZURE_ARTIFACTS_USER_NAME }}
 
-jobs:
-  delete-pre-releases:
-    name: Delete Unnecessary Pre-Releases
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout the repo
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+# jobs:
+#   delete-pre-releases:
+#     name: Delete Unnecessary Pre-Releases
+#     runs-on: ubuntu-latest
+#     permissions:
+#       contents: write
+#     steps:
+#       - name: Checkout the repo
+#         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
-      - name: Delete other pre-releases and their tags
-        shell: pwsh
-        run: |
-          $release = "${{ github.ref_name }}"
-          $repo = "${{ github.repository }}"
-          $token = "${{ secrets.GITHUB_TOKEN }}"
+#       - name: Delete other pre-releases and their tags
+#         shell: pwsh
+#         run: |
+#           $release = "${{ github.ref_name }}"
+#           $repo = "${{ github.repository }}"
+#           $token = "${{ secrets.GITHUB_TOKEN }}"
 
-          $page = 1
-          $release_list = @()
+#           $page = 1
+#           $release_list = @()
 
-          Do {
+#           Do {
 
-            $url = "https://api.github.com/repos/$repo/releases?per_page=100&page=$page"
-            $gh_headers = @{
-                "Accept"        = "application/vnd.github+json"
-                "Authorization" = "Bearer $token"
-            }
+#             $url = "https://api.github.com/repos/$repo/releases?per_page=100&page=$page"
+#             $gh_headers = @{
+#                 "Accept"        = "application/vnd.github+json"
+#                 "Authorization" = "Bearer $token"
+#             }
 
-            $release_list = Invoke-RestMethod $url -Headers $gh_headers
+#             $release_list = Invoke-RestMethod $url -Headers $gh_headers
 
-            $release_list | ForEach-Object {
-                if ($_.tag_name -like "Pre-Release-*" -and $_.prerelease) {
-                    "Deleting pre-release $($_.tag_name)" | Write-Output
-                    Invoke-RestMethod -Method Delete -Uri $_.url -Headers $gh_headers
-                }
-            }
+#             $release_list | ForEach-Object {
+#                 if ($_.tag_name -like "Pre-Release-*" -and $_.prerelease) {
+#                     "Deleting pre-release $($_.tag_name)" | Write-Output
+#                     Invoke-RestMethod -Method Delete -Uri $_.url -Headers $gh_headers
+#                 }
+#             }
 
-            $page += 1
-          } While ($release_list.count -gt 0)
+#             $page += 1
+#           } While ($release_list.count -gt 0)
 
  # Manually doing promote packages to release on azure artifacts
