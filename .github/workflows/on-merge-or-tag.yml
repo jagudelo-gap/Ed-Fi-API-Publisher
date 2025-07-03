@@ -15,7 +15,7 @@ permissions: read-all
 
 env:
   API_URL: https://api.github.com/repos/${{ github.repository }}
-  TOKEN: ${{ secrets.EDFI_BUILD_AGENT_PAT }}
+  TOKEN: ${{ github.token }}
 
 jobs:
   create-pre-releases:
